@@ -1,28 +1,36 @@
 ﻿using Markdig;
 using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Threading.Tasks;
 
-namespace AspNetCore.MarkdownMiddleware
+namespace AspNetCore.MarkdownMiddleware.Pages.Markdown
 {
-    public class MarkdownProcessingController : Controller
+    public class MarkdownRenderingPageModel : PageModel
     {
-        [HttpGet]
-        [Route("/MarkdownProcessingController/RenderMarkdown")]
-        public async Task<IActionResult> RenderMarkdown()
+        public MarkdownRenderingPageModel()
+        {
+        }
+
+        public string Title { get; private set; }
+
+        public string Date { get; private set; }
+
+        public HtmlString RenderedMarkdown { get; private set; }
+
+        public async Task OnGetAsync()
         {
             // retrive the model saved in the markdown processing middleware
             if (!(HttpContext.Items["MarkdownModel"] is MarkdownModel model))
                 throw new InvalidOperationException("No 'MarkdownModel' found in HttpContext.Items.");
 
             if (!System.IO.File.Exists(model.PhysicalPath))
-                return NotFound();
-            
+                return;
+
             string markdownContent = await System.IO.File.ReadAllTextAsync(model.PhysicalPath).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(markdownContent))
-                return NotFound();
+                return;
 
             markdownContent = markdownContent.Replace("\r\n", "\n");
 
@@ -37,8 +45,8 @@ namespace AspNetCore.MarkdownMiddleware
                 if (DateTime.TryParse(dateString, out var date))
                     dateString = date.ToLongDateString() + " " + date.ToLongTimeString();
 
-                model.Title = _FindString(toml, "title = \"", "\"\n");
-                model.Date = dateString;
+                Title = _FindString(toml, "title = \"", "\"\n");
+                Date = dateString;
 
                 // remove toml frontmatter from markdown content
                 markdownContent = markdownContent.Substring(toml.Length + 8);
@@ -49,9 +57,7 @@ namespace AspNetCore.MarkdownMiddleware
                 .UseEmojiAndSmiley()
                 .Build();
 
-            model.RenderedMarkdown = new HtmlString(Markdown.ToHtml(markdownContent, _pipeline));
-
-            return View("~/Pages/Markdown/_MarkdownViewTemplate.cshtml", model);
+            RenderedMarkdown = new HtmlString(Markdig.Markdown.ToHtml(markdownContent, _pipeline));
         }
 
         private static string _FindString(string source, string start, string end)
@@ -60,7 +66,7 @@ namespace AspNetCore.MarkdownMiddleware
                 return string.Empty;
 
             var startIndex = source.IndexOf(start, 0, source.Length);
-            
+
             if (startIndex == -1)
                 return string.Empty;
 

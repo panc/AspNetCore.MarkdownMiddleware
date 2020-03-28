@@ -19,8 +19,6 @@ namespace AspNetCore.MarkdownMiddleware
         public void ConfigureServices(IServiceCollection services)
         {
             // setup markdown middleware
-            services.AddHttpContextAccessor();
-            services.AddMvc();
             services.AddMarkdown(config =>
             {
                 config.BasePath = "md";
@@ -46,6 +44,8 @@ namespace AspNetCore.MarkdownMiddleware
             }
 
             app.UseHttpsRedirection();
+
+            // must be configured before app.UseRouting()!
             app.UseMarkdown(); 
             
             app.UseRouting();
@@ -54,9 +54,6 @@ namespace AspNetCore.MarkdownMiddleware
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
-
-                // MVC routing is required for markdown middleware
-                endpoints.MapDefaultControllerRoute();
             });
         }
     }

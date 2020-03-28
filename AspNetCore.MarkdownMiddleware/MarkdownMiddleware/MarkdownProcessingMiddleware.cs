@@ -59,7 +59,8 @@ namespace AspNetCore.MarkdownMiddleware
                 context.Items["MarkdownModel"] = model;
 
                 // rewrite path to a generic markdown rendering controller
-                context.Request.Path = "/MarkdownProcessingController/RenderMarkdown";
+                context.Request.Path = "/Markdown/MarkdownRenderingPage";
+
                 break;
             }
 
