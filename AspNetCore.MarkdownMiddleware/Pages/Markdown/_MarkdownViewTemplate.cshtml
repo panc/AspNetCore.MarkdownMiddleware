@@ -1,0 +1,13 @@
+@model MarkdownMiddleware.MarkdownModel
+@{
+    ViewBag.Title = Model.Title;
+    Layout = "_Layout";
+}
+
+<div class="post">
+    <h1 class="post-title">@Model.Title</h1>
+    <time datetime="@Model.Date" class="post-date"><i class="far fa-calendar-alt"></i> @Model.Date</time>
+    <div class="post-content">
+        @Model.RenderedMarkdown
+    </div>
+</div>

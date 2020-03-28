@@ -17,7 +17,18 @@ namespace AspNetCore.MarkdownMiddleware
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {           
+        {
+            // setup markdown middleware
+            services.AddHttpContextAccessor();
+            services.AddMvc();
+            services.AddMarkdown(config =>
+            {
+                config.BasePath = "md";
+
+                config.AddMarkdownFolder("/Samples");
+                config.AddMarkdownFolder("/Others");
+            });
+
             services.AddRazorPages();
         }
 
@@ -35,13 +46,17 @@ namespace AspNetCore.MarkdownMiddleware
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
+            app.UseMarkdown(); 
+            
             app.UseRouting();
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+
+                // MVC routing is required for markdown middleware
+                endpoints.MapDefaultControllerRoute();
             });
         }
     }

@@ -1,5 +1,4 @@
 ﻿using Markdig;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -7,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.MarkdownMiddleware
 {
-    [Authorize()]
     public class MarkdownProcessingController : Controller
     {
         [HttpGet]
