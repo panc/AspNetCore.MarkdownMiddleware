@@ -1,4 +1,9 @@
-﻿---
+﻿+++
+date = "2021-08-01T12:00:00"
+title = "Lorem Markdownum"
++++
+
+---
 __Advertisement :)__
 
 - __[pica](https://nodeca.github.io/pica/demo/)__ - high quality and fast image

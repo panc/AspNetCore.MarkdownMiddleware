@@ -1,47 +1,28 @@
-﻿@page "/Markdown/MarkdownRenderingPage"
+﻿@page "/client-side-markdown"
 @using Markdig
-@attribute [StreamRendering]
+@rendermode InteractiveAuto
 
-@if (RenderedMarkdown == null)
-{
-    <p><em>Loading...</em></p>
-    return;
-}
+<PageTitle>WASM markdown rendering</PageTitle>
 
-<PageTitle>@Title</PageTitle>
+<h1>Client side markdown rendering</h1>
 
-<div class="post">
-    <h1 class="post-title">@Title</h1>
-    <time datetime="@Date" class="post-date"><i class="far fa-calendar-alt"></i> @Date</time>
-    <div class="post-content">
-        @RenderedMarkdown
-    </div>
-</div>
+<button class="btn btn-primary" @onclick="LoadMarkdown">Load Markdown</button>
+
+<p>Title: @title</p>
+<p>Date: @date</p>
+<p role="status">@renderedMarkdown</p>
 
 
 @code {
-    public string? Title { get; private set; }
+    private MarkupString? renderedMarkdown;
+    private string title = "";
+    private string date = "";
 
-    public string? Date { get; private set; }
-
-    public MarkupString? RenderedMarkdown { get; private set; }
-
-    [CascadingParameter]
-    private HttpContext Context { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
+    private async Task LoadMarkdown()
     {
-        // retrive the model saved in the markdown redirect rule
-        if (!(Context.Items["MarkdownModel"] is MarkdownModel model))
-            throw new InvalidOperationException("No 'MarkdownModel' found in HttpContext.Items.");
-
-        if (!System.IO.File.Exists(model.PhysicalPath))
-            return;
-
-        string markdownContent = await System.IO.File.ReadAllTextAsync(model.PhysicalPath).ConfigureAwait(false);
-
-        if (string.IsNullOrEmpty(markdownContent))
-            return;
+        // retrive markdown content
+        HttpClient client = new HttpClient { BaseAddress = new Uri("https://localhost:7002/") };
+        var markdownContent = await client.GetStringAsync("md/Samples/Markdown-It.md");
 
         markdownContent = markdownContent.Replace("\r\n", "\n");
 
@@ -56,8 +37,8 @@
             if (DateTime.TryParse(dateString, out var date))
                 dateString = date.ToLongDateString() + " " + date.ToLongTimeString();
 
-            Title = _FindString(toml, "title = \"", "\"\n");
-            Date = dateString;
+            title = _FindString(toml, "title = \"", "\"\n");
+            this.date = dateString;
 
             // remove toml frontmatter from markdown content
             markdownContent = markdownContent.Substring(toml.Length + 8);
@@ -69,7 +50,7 @@
             .UseEmojiAndSmiley()
             .Build();
 
-        RenderedMarkdown = new MarkupString(Markdig.Markdown.ToHtml(markdownContent, _pipeline));
+        renderedMarkdown = new MarkupString(Markdig.Markdown.ToHtml(markdownContent, _pipeline));
     }
 
     private static string _FindString(string source, string start, string end)
