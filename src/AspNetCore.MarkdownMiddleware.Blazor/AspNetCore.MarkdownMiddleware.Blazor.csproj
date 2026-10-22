@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AspNetCore.MarkdownMiddleware.Blazor.Client\AspNetCore.MarkdownMiddleware.Blazor.Client.csproj" />
     <PackageReference Include="Markdig" Version="0.34.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.32" />
   </ItemGroup>
 
 </Project>
